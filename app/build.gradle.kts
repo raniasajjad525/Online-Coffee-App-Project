@@ -48,6 +48,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.ui)
+    implementation(libs.firebase.annotations)
+    implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material3:material3:1.3.0")
+        implementation("androidx.compose.material3:material3:1.3.1")
+        implementation("androidx.compose.ui:ui:1.7.6")
+    implementation(libs.androidx.compose.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -55,4 +63,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+
 }

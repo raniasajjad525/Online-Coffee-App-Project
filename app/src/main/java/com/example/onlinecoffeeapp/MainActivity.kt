@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.onlinecoffeeapp.screens.homescreen.HomeScreen
 import com.example.onlinecoffeeapp.ui.theme.OnlineCoffeeAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,11 +20,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OnlineCoffeeAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                HomeScreen()
 
                 }
             }
         }
     }
-}
 
