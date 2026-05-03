@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 @Preview
 @Composable
 fun HomeCatagories(){
-    val categories = listOf("All", "Latte", "Mocha", "Espresso", "Iris", "Lungo")
+    val categories = listOf("All", "Latte", "Mocha", "Espresso", "Iris", "Lungo", "Cappuccino")
 
     var selectedCategory by remember { mutableStateOf (categories.first()) }
 
