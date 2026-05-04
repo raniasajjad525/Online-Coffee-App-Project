@@ -1,3 +1,7 @@
+import org.gradle.kotlin.dsl.implementation
+
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -49,11 +53,20 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.material:material-icons-extended")
+        implementation ("androidx.navigation:navigation-compose:2.7.7")
+        implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+        implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+
+
 
     // Firebase ke liye - ye androidx wali use karo
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.play.services.analytics.impl)
+    implementation(libs.billing.ktx)
 
     // Ye sab delete kar diya
     // implementation(libs.androidx.ui) ← Duplicate

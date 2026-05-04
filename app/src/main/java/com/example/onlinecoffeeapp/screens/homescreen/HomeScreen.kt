@@ -1,19 +1,9 @@
 package com.example.onlinecoffeeapp.screens.homescreen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -35,15 +25,77 @@ import androidx.compose.ui.unit.sp
 import com.example.onlinecoffeeapp.R
 import com.example.onlinecoffeeapp.screens.ui_components.MyBottomNavBar
 
+data class Product(
+    val id: Int,
+    val name: String,
+    val description: String,
+    val price: Int,
+    val imagesRes: Int
+)
+
+// <-- PRODUCTS LIST AB FUNCTION SE BAHAR HAI, TOP LEVEL PE
+val products = listOf(
+    Product(
+        id = 1,
+        name = "Espresso",
+        description = "Strong and rich",
+        price = 500,
+        imagesRes = R.drawable.espresso
+    ),
+    Product(
+        id = 2,
+        name = "Latte",
+        description = "Smooth and creamy",
+        price = 300,
+        imagesRes = R.drawable.latte
+    ),
+    Product(
+        id = 3,
+        name = "Mocha",
+        description = "Strong and smooth",
+        price = 400,
+        imagesRes = R.drawable.mochaa
+    ),
+    Product(
+        id = 4,
+        name = "Lungo",
+        description = "With chocolate",
+        price = 550,
+        imagesRes = R.drawable.lungo
+    ),
+    Product(
+        id = 5,
+        name = "Iris",
+        description = "Velvety smooth",
+        price = 450,
+        imagesRes = R.drawable.iris
+    ),
+    Product(
+        id = 6,
+        name = "Cappuccino",
+        description = "Strong and thick",
+        price = 600,
+        imagesRes = R.drawable.cappuccino
+    )
+)
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onProductClick: (Product) -> Unit = {}
+) {
     val location = "Iqbal town,Lahore"
+
+    // <-- Yahan se products list delete kar di, upar wali use hogi
 
     Scaffold(
         bottomBar = { MyBottomNavBar() }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             // Background Brown Section
             Box(
                 modifier = Modifier
@@ -52,87 +104,62 @@ fun HomeScreen() {
                     .background(color = Color(0xFF8A5A36))
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
+            ProductsGrid(
+                products = products, // <-- ab ye top level wali list use ho rahi
+                topContent = {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Location",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
+                        Text(
+                            text = "Location",
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
 
-                Spacer(modifier = Modifier.height(height = 4.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = location,
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
-                    )
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Change Location",
-                        tint = Color.White
-                    )
-                }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = location,
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 16.sp
+                            )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Change Location",
+                                tint = Color.White
+                            )
+                        }
 
-                Spacer(modifier = Modifier.height(height = 30.dp))
+                        Spacer(modifier = Modifier.height(30.dp))
 
-                MySearchBar()
+                        MySearchBar()
 
-                Spacer(modifier = Modifier.height(height = 40.dp))
+                        Spacer(modifier = Modifier.height(40.dp))
 
-                Image(
-                    painter = painterResource(id = R.drawable.ban),
-                    contentDescription = "Home Banner",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.FillWidth
-                )
+                        Image(
+                            painter = painterResource(id = R.drawable.ban),
+                            contentDescription = "Home Banner",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp)),
+                            contentScale = ContentScale.FillWidth
+                        )
 
-                Spacer(modifier = Modifier.height(height = 16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                HomeCatagories()
+                        HomeCatagories()
 
-                Spacer(modifier = Modifier.height(height = 8.dp))
-
-                //Displaying Products
-                val products = remember {
-                    listOf(
-                        Product(id = 1, name = "Espresso", description = "Strong and rich", price = 500, imagesRes = R.drawable.expresso),
-                        Product(id = 2, name = "Latte", description = "Smooth and creamy", price = 300, imagesRes = R.drawable.latte),
-                        Product(id = 3, name = "Mocha", description = "Strong and smooth", price = 400, imagesRes = R.drawable.mocha),
-                        Product(id = 4, name = "Lungo", description = "With chocolate", price = 550, imagesRes = R.drawable.lungo),
-                        Product(id = 5, name = "Iris", description = "Velvety smooth", price = 450, imagesRes = R.drawable.iris),
-                        Product(id = 6, name = "Cappuccino", description = "Strong and thick", price = 600, imagesRes = R.drawable.cappuccino)
-                    )
-                }
-
-                ProductsGrid(products = products, modifier = Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProductsGrid(products: List<Product>, modifier: Modifier = Modifier) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(products) { product ->
-            ProductDetails(product = product)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                },
+                onProductClick = onProductClick
+            )
         }
     }
 }
