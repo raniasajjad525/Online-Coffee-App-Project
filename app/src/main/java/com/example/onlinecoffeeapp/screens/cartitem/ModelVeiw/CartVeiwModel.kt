@@ -3,7 +3,7 @@ package com.example.onlinecoffeeapp.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.example.onlinecoffeeapp.data.CartItem
-import com.example.onlinecoffeeapp.screens.homescreen.Product
+import com.example.onlinecoffeeapp.model.Product
 
 class CartViewModel : ViewModel() {
     private val _cartItems = mutableStateListOf<CartItem>()

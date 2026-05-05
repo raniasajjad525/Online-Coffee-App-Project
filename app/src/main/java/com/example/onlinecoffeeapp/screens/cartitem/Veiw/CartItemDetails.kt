@@ -1,6 +1,6 @@
 package com.example.onlinecoffeeapp.data
 
-import com.example.onlinecoffeeapp.screens.homescreen.Product
+import com.example.onlinecoffeeapp.model.Product
 
 data class CartItem(
     val product: Product,

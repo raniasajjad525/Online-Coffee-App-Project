@@ -1,24 +1,18 @@
-import org.gradle.kotlin.dsl.implementation
-
-
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "com.example.onlinecoffeeapp"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.onlinecoffeeapp"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -41,9 +35,13 @@ android {
     buildFeatures {
         compose = true
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
+   // implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,31 +50,15 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.foundation.layout)
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.compose.material:material-icons-extended")
-        implementation ("androidx.navigation:navigation-compose:2.7.7")
-        implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-        implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
-
-
-
-    // Firebase ke liye - ye androidx wali use karo
-    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.play.services.analytics.impl)
-    implementation(libs.billing.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
 
-    // Ye sab delete kar diya
-    // implementation(libs.androidx.ui) ← Duplicate
-    // implementation(libs.firebase.annotations) ← Firebase BOM se aayega
-    // implementation(libs.androidx.material3) ← Duplicate
-    // implementation("androidx.compose.material3:material3:1.3.0") ← Duplicate
-    // implementation("androidx.compose.material3:material3:1.3.1") ← Duplicate
-    // implementation("androidx.compose.ui:ui:1.7.6") ← BOM se aayega
-    // implementation(libs.play.services.analytics.impl) ← Support library lati hai
-    // implementation(libs.animated.vector.drawable) ← Support library lati hai
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.analytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

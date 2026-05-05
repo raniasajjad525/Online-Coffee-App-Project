@@ -1,22 +1,21 @@
-package com.example.onlinecoffeeapp.screens.loginscreen
+package com.example.onlinecoffeeapp.screens.loginscreen.View
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.onlinecoffeeapp.viewmodel.AuthState
+import com.example.onlinecoffeeapp.viewmodel.AuthViewModel
 
-// Color palette extracted from the image
 val BrownBackground = Color(0xFF8D5543)
 val BrownHeader = Color(0xFFB37459)
 val TextLabelColor = Color(0xFFE0C3B8)
@@ -24,11 +23,21 @@ val ButtonTextColor = Color(0xFF5D3A2E)
 
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit = {},
-    onSignUpClick: () -> Unit = {}
+    onLoginSuccess: () -> Unit,
+    onSignUpClick: () -> Unit,
+    onForgetPasswordClick: () -> Unit,
+    viewModel: AuthViewModel = viewModel()
 ) {
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val authState by viewModel.authState.collectAsState()
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Success) {
+            onLoginSuccess()
+            viewModel.resetState()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -36,7 +45,6 @@ fun LoginScreen(
             .background(BrownBackground),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Header Section with Rounded Bottom Corners
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -57,23 +65,21 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Form Section
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 40.dp)
         ) {
-            // Username Label and Field
             Text(
-                text = "Username:",
+                text = "Email:",
                 color = TextLabelColor,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium
             )
             Spacer(modifier = Modifier.height(8.dp))
             TextField(
-                value = username,
-                onValueChange = { username = it },
+                value = email,
+                onValueChange = { email = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp),
@@ -89,7 +95,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Password Label and Field
             Text(
                 text = "Password:",
                 color = TextLabelColor,
@@ -114,9 +119,17 @@ fun LoginScreen(
                 shape = RoundedCornerShape(20.dp)
             )
 
-            // Forget Password Text
+            if (authState is AuthState.Error) {
+                Text(
+                    text = (authState as AuthState.Error).message,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
             TextButton(
-                onClick = { /* Handle Forget Password */ },
+                onClick = onForgetPasswordClick,
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(
@@ -128,47 +141,42 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Buttons Column
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Login Button
-                Button(
-                    onClick = onLoginClick,
-                    modifier = Modifier
-                        .width(180.dp)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD9D9D9)
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                ){
-                    Text(text = "Login", color = ButtonTextColor, fontWeight = FontWeight.Bold)
-                }
+                if (authState is AuthState.Loading) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
+                    Button(
+                        onClick = { viewModel.login(email, password) },
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFD9D9D9)
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(text = "Login", color = ButtonTextColor, fontWeight = FontWeight.Bold)
+                    }
 
-                Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(15.dp))
 
-                // Sign up Button
-                Button(
-                    onClick = onSignUpClick,
-                    modifier = Modifier
-                        .width(180.dp)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD9D9D9)
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Text(text = "Sign up", color = ButtonTextColor, fontWeight = FontWeight.Bold)
+                    Button(
+                        onClick = onSignUpClick,
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFD9D9D9)
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(text = "Sign up", color = ButtonTextColor, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    LoginScreen()
 }

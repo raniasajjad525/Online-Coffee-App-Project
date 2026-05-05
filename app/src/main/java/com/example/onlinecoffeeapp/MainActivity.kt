@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.onlinecoffeeapp.navigation.AppNavigation
-import com.example.onlinecoffeeapp.screens.homescreen.HomeScreen
 import com.example.onlinecoffeeapp.ui.theme.OnlineCoffeeAppTheme
 
 

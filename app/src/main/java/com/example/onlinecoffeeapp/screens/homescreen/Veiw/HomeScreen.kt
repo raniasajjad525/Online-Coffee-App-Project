@@ -1,6 +1,5 @@
-package com.example.onlinecoffeeapp.screens.homescreen
+package com.example.onlinecoffeeapp.screens.homescreen.Veiw
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,7 +10,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,74 +19,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onlinecoffeeapp.R
+import com.example.onlinecoffeeapp.model.Product
 import com.example.onlinecoffeeapp.screens.ui_components.MyBottomNavBar
+import com.example.onlinecoffeeapp.viewmodel.CoffeeViewModel
 
-data class Product(
-    val id: Int,
-    val name: String,
-    val description: String,
-    val price: Int,
-    val imagesRes: Int
-)
-
-// <-- PRODUCTS LIST AB FUNCTION SE BAHAR HAI, TOP LEVEL PE
-val products = listOf(
-    Product(
-        id = 1,
-        name = "Espresso",
-        description = "Strong and rich",
-        price = 500,
-        imagesRes = R.drawable.espresso
-    ),
-    Product(
-        id = 2,
-        name = "Latte",
-        description = "Smooth and creamy",
-        price = 300,
-        imagesRes = R.drawable.latte
-    ),
-    Product(
-        id = 3,
-        name = "Mocha",
-        description = "Strong and smooth",
-        price = 400,
-        imagesRes = R.drawable.mocha
-    ),
-    Product(
-        id = 4,
-        name = "Lungo",
-        description = "With chocolate",
-        price = 550,
-        imagesRes = R.drawable.lungo
-    ),
-    Product(
-        id = 5,
-        name = "Iris",
-        description = "Velvety smooth",
-        price = 450,
-        imagesRes = R.drawable.iris
-    ),
-    Product(
-        id = 6,
-        name = "Cappuccino",
-        description = "Strong and thick",
-        price = 600,
-        imagesRes = R.drawable.cappuccino
-    )
-)
-
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreen(
-    onProductClick: (Product) -> Unit = {}
+    onProductClick: (Product) -> Unit = {},
+    coffeeViewModel: CoffeeViewModel = viewModel()
 ) {
-    val location = "Iqbal town,Lahore"
-
-    // <-- Yahan se products list delete kar di, upar wali use hogi
+    val products by coffeeViewModel.products.collectAsState()
+    val location = "Iqbal town, Lahore"
 
     Scaffold(
         bottomBar = { MyBottomNavBar() }
@@ -105,7 +52,7 @@ fun HomeScreen(
             )
 
             ProductsGrid(
-                products = products, // <-- ab ye top level wali list use ho rahi
+                products = products,
                 topContent = {
                     Column(
                         modifier = Modifier.padding(horizontal = 16.dp)

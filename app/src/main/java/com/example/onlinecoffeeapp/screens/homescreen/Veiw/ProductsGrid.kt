@@ -1,4 +1,4 @@
-package com.example.onlinecoffeeapp.screens.homescreen
+package com.example.onlinecoffeeapp.screens.homescreen.Veiw
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onlinecoffeeapp.model.Product
 import com.example.onlinecoffeeapp.ui.theme.CreamBeige
 
 @Composable
@@ -75,20 +76,19 @@ fun ProductCard(
     onProductClick: (Product) -> Unit
 ) {
     val brownColor = Color(0xFF8A5A36)
-    val cardColor = Color(0xFFF8F8F8) // <-- SCREENSHOT WALA OFF-WHITE
+    val cardColor = Color(0xFFF8F8F8)
     var isFavourite by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
-            .shadow(1.dp, RoundedCornerShape(16.dp)) // <-- Halka shadow
+            .shadow(1.dp, RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
-            .background(color = cardColor) // <-- Off-white container
+            .background(color = cardColor)
             .clickable { onProductClick(product) }
     ) {
         Column(
             modifier = Modifier.padding(10.dp)
         ) {
-            // <-- IMAGE KA EXTRA BOX AUR BACKGROUND HATA DIYA
             Image(
                 painter = painterResource(id = product.imagesRes),
                 contentDescription = product.name,
@@ -96,7 +96,7 @@ fun ProductCard(
                     .fillMaxWidth()
                     .height(110.dp)
                     .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop // <-- Crop wapis kar diya
+                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -104,8 +104,8 @@ fun ProductCard(
             Text(
                 text = product.name,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold, // <-- Bold
-                color = Color.Black // <-- Black
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
             )
 
             Text(
@@ -125,16 +125,15 @@ fun ProductCard(
             )
         }
 
-        // <-- HEART ICON AB DECENT HAI - BOX HATA DIYA
         Icon(
             imageVector = if (isFavourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             contentDescription = "Favourite",
-            tint = if (isFavourite) Color.Red else CreamBeige.copy(alpha = 0.5f),
+            tint = if (isFavourite) Color.Red else Color.Gray.copy(alpha = 0.5f),
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(14.dp)
                 .size(20.dp)
-                .clickable { isFavourite =!isFavourite }
+                .clickable { isFavourite = !isFavourite }
         )
     }
 }

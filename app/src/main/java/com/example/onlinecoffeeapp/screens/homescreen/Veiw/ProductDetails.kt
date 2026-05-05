@@ -1,4 +1,4 @@
-package com.example.onlinecoffeeapp.screens.detailscreen
+package com.example.onlinecoffeeapp.screens.homescreen.Veiw
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,22 +19,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.onlinecoffeeapp.screens.homescreen.Product
-//import com.google.android.gms.analytics.ecommerce.Product
+import com.example.onlinecoffeeapp.model.Product
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
     product: Product,
     onBackClick: () -> Unit,
-    onAddToCart: (Product, String, Int) -> Unit
+    onAddToCart: (Product, String, Double) -> Unit
 ) {
     var selectedSize by remember { mutableStateOf("M") }
 
     val currentPrice = when (selectedSize) {
-        "S" -> 400
-        "M" -> 500
-        "L" -> 600
+        "S" -> product.price - 100
+        "M" -> product.price
+        "L" -> product.price + 100
         else -> product.price
     }
 
