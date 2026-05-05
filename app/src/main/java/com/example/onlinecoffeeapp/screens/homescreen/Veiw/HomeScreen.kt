@@ -54,7 +54,7 @@ val products = listOf(
         name = "Mocha",
         description = "Strong and smooth",
         price = 400,
-        imagesRes = R.drawable.mochaa
+        imagesRes = R.drawable.mocha
     ),
     Product(
         id = 4,
