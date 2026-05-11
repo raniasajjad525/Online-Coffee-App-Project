@@ -1,6 +1,8 @@
 package com.example.onlinecoffeeapp.screens.ui_components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -34,13 +36,17 @@ fun MyBottomNavBar(
 
     NavigationBar(
         containerColor = Color.White,
-        modifier = Modifier.height(80.dp),
-        tonalElevation = 0.dp
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(95.dp) // Fixed height to prevent cutting off
+            .navigationBarsPadding(), // Handle gesture navigation
+        tonalElevation = 8.dp
     ) {
         navItems.forEach { item ->
             val isSelected = selectedItem == item.title
-            val contentColor = if (isSelected) DarkBrown else DarkBrown.copy(alpha = 0.8f)
-            
+            // Making icons as visible as the home icon
+            val contentColor = if (isSelected) DarkBrown else DarkBrown.copy(alpha = 0.85f)
+
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
@@ -55,7 +61,7 @@ fun MyBottomNavBar(
                     Icon(
                         painter = painterResource(id = item.icon),
                         contentDescription = item.title,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(28.dp), // Increased size
                         tint = contentColor
                     )
                 },
@@ -69,11 +75,11 @@ fun MyBottomNavBar(
                 },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Color.Transparent,
+                    indicatorColor = Color.Transparent, // Unique look
                     selectedIconColor = DarkBrown,
+                    unselectedIconColor = DarkBrown.copy(alpha = 0.85f),
                     selectedTextColor = DarkBrown,
-                    unselectedIconColor = DarkBrown.copy(alpha = 0.8f),
-                    unselectedTextColor = DarkBrown.copy(alpha = 0.8f)
+                    unselectedTextColor = DarkBrown.copy(alpha = 0.85f)
                 )
             )
         }

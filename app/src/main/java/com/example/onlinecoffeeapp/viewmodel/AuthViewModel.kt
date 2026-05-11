@@ -2,7 +2,6 @@ package com.example.onlinecoffeeapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
@@ -33,7 +32,6 @@ class AuthViewModel : ViewModel() {
             _authState.value = AuthState.Error("Email and Password cannot be empty")
             return
         }
-
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
@@ -56,7 +54,6 @@ class AuthViewModel : ViewModel() {
             _authState.value = AuthState.Error("Email and Password cannot be empty")
             return
         }
-
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
@@ -83,10 +80,14 @@ class AuthViewModel : ViewModel() {
                     if (task.isSuccessful) {
                         _authState.value = AuthState.Success
                     } else {
-                        _authState.value = AuthState.Error(task.exception?.message ?: "Google Sign-In failed")
+                        _authState.value = AuthState.Error(task.exception?.message ?: "Google Auth Failed")
                     }
                 }
         }
+    }
+
+    fun setError(message: String) {
+        _authState.value = AuthState.Error(message)
     }
 
     fun resetPassword(email: String) {
@@ -94,7 +95,6 @@ class AuthViewModel : ViewModel() {
             _authState.value = AuthState.Error("Email cannot be empty")
             return
         }
-
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {

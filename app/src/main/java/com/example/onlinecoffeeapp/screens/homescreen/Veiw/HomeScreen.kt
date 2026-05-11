@@ -39,6 +39,7 @@ fun HomeScreen(
     val currentLocation by coffeeViewModel.currentLocation.collectAsState()
     
     var showLocationMenu by remember { mutableStateOf(false) }
+    var isListView by remember { mutableStateOf(false) } // State for toggling List/Grid view
 
     Scaffold(
         bottomBar = { 
@@ -68,6 +69,7 @@ fun HomeScreen(
                 products = filteredProducts,
                 favoriteIds = favoriteIds,
                 onFavoriteClick = { productId -> coffeeViewModel.toggleFavorite(productId) },
+                isListView = isListView, // Passing the toggle state
                 topContent = {
                     Column(
                         modifier = Modifier.padding(horizontal = 16.dp)
@@ -131,8 +133,7 @@ fun HomeScreen(
                             query = searchQuery,
                             onQueryChange = { coffeeViewModel.setSearchQuery(it) },
                             onFilterClick = {
-                                coffeeViewModel.setSearchQuery("")
-                                coffeeViewModel.setCategory("All")
+                                isListView = !isListView // Toggling List/Grid view on icon click
                             }
                         )
 
