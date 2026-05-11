@@ -7,11 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import com.example.onlinecoffeeapp.navigation.AppNavigation
 import com.example.onlinecoffeeapp.ui.theme.OnlineCoffeeAppTheme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()  // This is valid since we imported androidx.activity.enableEdgeToEdge
+        enableEdgeToEdge()
         setContent {
             OnlineCoffeeAppTheme {
                 AppNavigation()

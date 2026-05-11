@@ -1,14 +1,8 @@
-package com.example.onlinecoffeeapp.screens.welcomescreen
+package com.example.onlinecoffeeapp.screens.welcomescreen.Veiw
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -19,20 +13,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onlinecoffeeapp.R
 
-
-
-@Preview(showBackground = true)
 @Composable
-fun WelcomeScreen() {
-
+fun WelcomeScreen(
+    onGetStartedClick: () -> Unit
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center // This centers everything inside
+        contentAlignment = Alignment.Center
     ) {
         // 1. Background image
         Image(
@@ -44,14 +35,15 @@ fun WelcomeScreen() {
 
         // 2. Centered content - text + button
         Column(
-            //Modifier.padding(24.dp),
-            modifier = Modifier.offset(y= (-110).dp),
-            Arrangement.Center,
-            Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Coffee Online",
-                fontSize = 32.sp,
+                fontSize = 42.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
@@ -60,26 +52,29 @@ fun WelcomeScreen() {
 
             Text(
                 text = "Get started with your favourite coffee",
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            // Inside WelcomeScreen.kt
             Button(
-                onClick = {
-                    // If using navigation:
-                    // navController.navigate("login")
-                },
+                onClick = onGetStartedClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF8B4513)
                 ),
-                modifier = Modifier.fillMaxWidth(0.6f)
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp)
             ) {
-                Text("Get Started", color = Color.White)
+                Text(
+                    "Get Started",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
-
         }
     }
 }

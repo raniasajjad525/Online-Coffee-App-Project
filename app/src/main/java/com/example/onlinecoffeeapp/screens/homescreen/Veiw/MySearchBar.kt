@@ -17,10 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,18 +26,20 @@ import com.example.onlinecoffeeapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MySearchBar() {
-    var searchText by remember { mutableStateOf("") }
-
+fun MySearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onFilterClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
-            value = searchText,
-            onValueChange = { searchText = it },
+            value = query,
+            onValueChange = onQueryChange,
             placeholder = {
-                Text(text = "Search", color = Color.Gray)
+                Text(text = "Search coffee...", color = Color.Gray)
             },
             leadingIcon = {
                 Icon(
@@ -75,7 +73,7 @@ fun MySearchBar() {
         Spacer(modifier = Modifier.width(8.dp))
 
         IconButton(
-            onClick = { },
+            onClick = onFilterClick,
             modifier = Modifier
                 .size( width = 50.dp , height = 58.dp)
                 .background(

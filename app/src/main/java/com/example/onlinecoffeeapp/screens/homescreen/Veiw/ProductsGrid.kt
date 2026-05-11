@@ -13,10 +13,6 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,20 +24,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onlinecoffeeapp.model.Product
-import com.example.onlinecoffeeapp.ui.theme.CreamBeige
 
 @Composable
 fun ProductsGrid(
     products: List<Product>,
+    favoriteIds: Set<Int>,
+    onFavoriteClick: (Int) -> Unit,
     topContent: @Composable () -> Unit,
-    onProductClick : (Product) -> Unit
+    onProductClick: (Product) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(all = 8.dp)
     ) {
-        item{
+        item {
             topContent()
         }
         items(items = products.chunked(size = 2)) { rowItems ->
@@ -51,12 +48,16 @@ fun ProductsGrid(
             ) {
                 ProductCard(
                     product = rowItems[0],
+                    isFavorite = favoriteIds.contains(rowItems[0].id),
+                    onFavoriteClick = { onFavoriteClick(rowItems[0].id) },
                     modifier = Modifier.weight(1f),
                     onProductClick = onProductClick
                 )
                 if (rowItems.size > 1) {
                     ProductCard(
                         product = rowItems[1],
+                        isFavorite = favoriteIds.contains(rowItems[1].id),
+                        onFavoriteClick = { onFavoriteClick(rowItems[1].id) },
                         modifier = Modifier.weight(1f),
                         onProductClick = onProductClick
                     )
@@ -72,12 +73,13 @@ fun ProductsGrid(
 @Composable
 fun ProductCard(
     product: Product,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier,
     onProductClick: (Product) -> Unit
 ) {
     val brownColor = Color(0xFF8A5A36)
     val cardColor = Color(0xFFF8F8F8)
-    var isFavourite by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -126,14 +128,14 @@ fun ProductCard(
         }
 
         Icon(
-            imageVector = if (isFavourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             contentDescription = "Favourite",
-            tint = if (isFavourite) Color.Red else Color.Gray.copy(alpha = 0.5f),
+            tint = if (isFavorite) brownColor else Color.Gray.copy(alpha = 0.5f),
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(14.dp)
                 .size(20.dp)
-                .clickable { isFavourite = !isFavourite }
+                .clickable { onFavoriteClick() }
         )
     }
 }
