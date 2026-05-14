@@ -27,7 +27,11 @@ fun AddressBookScreen(onBackClick: () -> Unit) {
 
     val addresses = listOf(
         UserAddress("Home", "House #12, Street 4, Iqbal Town, Lahore"),
-        UserAddress("Office", "Software Park, 5th Floor, Gulberg, Lahore")
+        UserAddress("Office", "Software Park, 5th Floor, Gulberg, Lahore"),
+        UserAddress("Gym", "Plot 45, Block Z, DHA Phase 3, Lahore"),
+        UserAddress("University", "C-1, Johar Town, near Emporium Mall, Lahore"),
+        UserAddress("Studio", "Sector C, Bahria Town, Lahore"),
+        UserAddress("Cafe Hub", "Main Boulevard, Model Town, Lahore")
     )
 
     Scaffold(

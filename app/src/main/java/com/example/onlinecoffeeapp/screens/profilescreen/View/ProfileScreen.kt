@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +35,7 @@ fun ProfileScreen(
 ) {
     val currentUser = authViewModel.currentUser
     val brownColor = Color(0xFF8A5A36)
+    val goldColor = Color(0xFFFFD700)
     val lightBgColor = Color(0xFFFFF5EE)
 
     Scaffold(
@@ -94,13 +96,21 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Welcome Back!",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
+                text = "Jee Aayan Nu! (Welcome)",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
                 color = brownColor
             )
+            
+            Text(
+                text = "Lahore's Coffee Connoisseur",
+                fontSize = 14.sp,
+                fontStyle = FontStyle.Italic,
+                color = goldColor,
+                fontWeight = FontWeight.Medium
+            )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // User ID / Email
             Card(
@@ -131,8 +141,17 @@ fun ProfileScreen(
 
             // Profile Options
             ProfileOptionItem(title = "My Orders", brownColor = brownColor, onClick = onMyOrdersClick)
-            ProfileOptionItem(title = "Address Book", brownColor = brownColor, onClick = onAddressBookClick)
-            ProfileOptionItem(title = "Settings", brownColor = brownColor, onClick = onSettingsClick)
+            ProfileOptionItem(title = "Lahore Address Book", brownColor = brownColor, onClick = onAddressBookClick)
+            ProfileOptionItem(title = "App Settings", brownColor = brownColor, onClick = onSettingsClick)
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Text(
+                text = "Made with ❤️ in Lahore",
+                fontSize = 12.sp,
+                color = Color.Gray.copy(alpha = 0.6f),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
     }
 }
@@ -154,7 +173,7 @@ fun ProfileOptionItem(title: String, brownColor: Color, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = title, fontSize = 16.sp, color = brownColor)
+            Text(text = title, fontSize = 16.sp, color = brownColor, fontWeight = FontWeight.Medium)
             Icon(
                 painter = painterResource(id = R.drawable.profile),
                 contentDescription = null,

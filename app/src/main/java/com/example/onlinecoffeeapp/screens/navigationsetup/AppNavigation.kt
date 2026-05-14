@@ -10,15 +10,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.onlinecoffeeapp.screens.cartitem.Veiw.CartScreen
+import com.example.onlinecoffeeapp.screens.cartitem.Veiw.OrderReviewScreen
 import com.example.onlinecoffeeapp.screens.favorites.View.FavoritesScreen
 import com.example.onlinecoffeeapp.screens.forgetscreen.Veiw.ForgetPasswordScreen
-import com.example.onlinecoffeeapp.screens.homescreen.Veiw.HomeScreen
 import com.example.onlinecoffeeapp.screens.homescreen.Veiw.ProductDetailScreen
+import com.example.onlinecoffeeapp.screens.homescreen.view.HomeScreen
 import com.example.onlinecoffeeapp.screens.loginscreen.View.LoginScreen
 import com.example.onlinecoffeeapp.screens.profilescreen.View.AddressBookScreen
-import com.example.onlinecoffeeapp.screens.profilescreen.View.MyOrdersScreen
 import com.example.onlinecoffeeapp.screens.profilescreen.View.ProfileScreen
 import com.example.onlinecoffeeapp.screens.profilescreen.View.SettingsScreen
+import com.example.onlinecoffeeapp.screens.profilescreen.view.MyOrdersScreen
 import com.example.onlinecoffeeapp.screens.signupscreen.Veiw.SignUpScreen
 import com.example.onlinecoffeeapp.screens.welcomescreen.Veiw.WelcomeScreen
 import com.example.onlinecoffeeapp.viewmodel.AuthViewModel
@@ -105,7 +106,20 @@ fun AppNavigation() {
         composable("cart") {
             CartScreen(
                 coffeeViewModel = coffeeViewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onCheckoutClick = { navController.navigate("order_review") }
+            )
+        }
+
+        composable("order_review") {
+            OrderReviewScreen(
+                coffeeViewModel = coffeeViewModel,
+                onBackClick = { navController.popBackStack() },
+                onOrderSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
             )
         }
 

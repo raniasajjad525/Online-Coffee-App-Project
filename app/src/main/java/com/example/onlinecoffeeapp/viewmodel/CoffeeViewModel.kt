@@ -1,38 +1,59 @@
 package com.example.onlinecoffeeapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.onlinecoffeeapp.R
 import com.example.onlinecoffeeapp.model.Product
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 data class CartItem(
-    val product: Product,
-    var quantity: Int = 1,
+    val product: Product = Product(),
+    val quantity: Int = 1,
     val size: String = "Medium"
 )
 
+// Firestore record ke liye simplified class
+data class OrderItem(
+    val name: String = "",
+    val price: Double = 0.0,
+    val quantity: Int = 0,
+    val size: String = ""
+)
+
 data class Order(
-    val id: String,
-    val date: String,
-    val amount: String,
-    val status: String,
-    val items: List<CartItem>
+    val id: String = "",
+    val userId: String = "",
+    val userEmail: String = "",
+    val date: String = "",
+    val amount: Double = 0.0,
+    val status: String = "Placed",
+    val items: List<OrderItem> = emptyList()
 )
 
 class CoffeeViewModel : ViewModel() {
 
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
     private val _products = MutableStateFlow<List<Product>>(emptyList())
     val products: StateFlow<List<Product>> = _products.asStateFlow()
+
+    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
+    val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
+
+    private val _orders = MutableStateFlow<List<Order>>(emptyList())
+    val orders: StateFlow<List<Order>> = _orders.asStateFlow()
+
+    private val _isPlacingOrder = MutableStateFlow(false)
+    val isPlacingOrder: StateFlow<Boolean> = _isPlacingOrder.asStateFlow()
 
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
@@ -40,26 +61,46 @@ class CoffeeViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _currentLocation = MutableStateFlow("Iqbal Town, Lahore")
-    val currentLocation: StateFlow<String> = _currentLocation.asStateFlow()
-
-    val availableLocations = listOf(
-        "Iqbal Town, Lahore",
-        "Gulberg, Lahore",
-        "DHA Phase 5, Lahore",
-        "Johar Town, Lahore",
-        "Model Town, Lahore",
-        "Bahria Town, Lahore"
-    )
-
-    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
-    val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
-
     private val _favoriteIds = MutableStateFlow<Set<Int>>(emptySet())
     val favoriteIds: StateFlow<Set<Int>> = _favoriteIds.asStateFlow()
 
-    private val _orders = MutableStateFlow<List<Order>>(emptyList())
-    val orders: StateFlow<List<Order>> = _orders.asStateFlow()
+    private val _currentLocation = MutableStateFlow("Gulberg, Lahore")
+    val currentLocation: StateFlow<String> = _currentLocation.asStateFlow()
+
+    val availableLocations = listOf(
+        "Gulberg, Lahore",
+        "DHA Phase 1-9, Lahore",
+        "Johar Town, Lahore",
+        "Model Town, Lahore",
+        "Bahria Town, Lahore",
+        "Iqbal Town, Lahore",
+        "Garden Town, Lahore",
+        "Wapda Town, Lahore",
+        "Cavalry Ground, Lahore",
+        "Sammanabad, Lahore",
+        "Shadman, Lahore",
+        "Lahore Cantt",
+        "Township, Lahore",
+        "Faisal Town, Lahore",
+        "Sabzazar, Lahore",
+        "Lake City, Lahore",
+        "Valencia, Lahore",
+        "Green Town, Lahore",
+        "Architects Society, Lahore",
+        "EME Society, Lahore",
+        "State Life Society, Lahore",
+        "Paragon City, Lahore",
+        "Bahria Orchard, Lahore",
+        "Park View City, Lahore",
+        "Al-Rehman Garden, Lahore",
+        "Muslim Town, Lahore",
+        "Gulshan-e-Ravi, Lahore",
+        "Ichhra, Lahore",
+        "Garhi Shahu, Lahore",
+        "Mughalpura, Lahore",
+        "Mall Road, Lahore",
+        "Anarkali, Lahore"
+    )
 
     val filteredProducts: StateFlow<List<Product>> = combine(_products, _selectedCategory, _searchQuery) { products, category, query ->
         products.filter { product ->
@@ -69,7 +110,13 @@ class CoffeeViewModel : ViewModel() {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
+        val settings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
+        db.firestoreSettings = settings
+        
         loadProducts()
+        fetchOrders()
     }
 
     private fun loadProducts() {
@@ -81,24 +128,6 @@ class CoffeeViewModel : ViewModel() {
             Product(5, "Iris", "Velvety smooth", 450.0, R.drawable.iris, "Iris"),
             Product(6, "Cappuccino", "Strong and thick", 600.0, R.drawable.cappuccino, "Cappuccino")
         )
-    }
-
-    fun setCategory(category: String) {
-        _selectedCategory.value = category
-    }
-
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
-    }
-
-    fun setLocation(location: String) {
-        _currentLocation.value = location
-    }
-
-    fun toggleFavorite(productId: Int) {
-        _favoriteIds.update { current ->
-            if (current.contains(productId)) current - productId else current + productId
-        }
     }
 
     fun addToCart(product: Product, size: String) {
@@ -115,37 +144,102 @@ class CoffeeViewModel : ViewModel() {
     }
 
     fun removeFromCart(cartItem: CartItem) {
-        _cartItems.update { currentCart ->
-            currentCart.filter { it != cartItem }
-        }
+        _cartItems.update { current -> current.filter { it != cartItem } }
     }
 
     fun updateQuantity(cartItem: CartItem, increase: Boolean) {
-        _cartItems.update { currentCart ->
-            currentCart.map {
+        _cartItems.update { current ->
+            current.map {
                 if (it == cartItem) {
-                    val newQuantity = if (increase) it.quantity + 1 else (it.quantity - 1).coerceAtLeast(1)
-                    it.copy(quantity = newQuantity)
+                    val newQty = if (increase) it.quantity + 1 else (it.quantity - 1).coerceAtLeast(1)
+                    it.copy(quantity = newQty)
                 } else it
             }
         }
     }
 
-    fun checkout(): Boolean {
-        if (_cartItems.value.isEmpty()) return false
+    fun confirmOrder(onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val currentItems = _cartItems.value
+        if (currentItems.isEmpty()) {
+            onFailure("Cart is empty")
+            return
+        }
 
-        val totalPrice = _cartItems.value.sumOf { it.product.price * it.quantity }
-        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-        val newOrder = Order(
-            id = "#${(1000..9999).random()}",
-            date = dateFormat.format(Date()),
-            amount = "Rs. $totalPrice",
-            status = "In Progress",
-            items = _cartItems.value
-        )
+        val user = auth.currentUser
+        if (user == null) {
+            onFailure("Please login first")
+            return
+        }
 
-        _orders.update { listOf(newOrder) + it }
-        _cartItems.value = emptyList()
-        return true
+        _isPlacingOrder.value = true
+
+        viewModelScope.launch {
+            val totalPrice = currentItems.sumOf { it.product.price * it.quantity }
+            val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+            val dateString = dateFormat.format(Date())
+            val orderId = db.collection("orders").document().id
+            val userEmail = user.email ?: "Unknown User"
+            
+            val orderItemsList = currentItems.map {
+                OrderItem(it.product.name, it.product.price, it.quantity, it.size)
+            }
+
+            val orderData = Order(
+                id = orderId,
+                userId = user.uid,
+                userEmail = userEmail,
+                date = dateString,
+                amount = totalPrice,
+                status = "Placed",
+                items = orderItemsList
+            )
+
+            db.collection("orders").document(orderId).set(orderData)
+                .addOnSuccessListener {
+                    _orders.update { listOf(orderData) + it }
+                    _cartItems.value = emptyList()
+                    _isPlacingOrder.value = false
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    _isPlacingOrder.value = false
+                    onFailure(e.message ?: "Failed to save order")
+                }
+        }
+    }
+
+    fun cancelOrder(orderId: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        db.collection("orders").document(orderId).delete()
+            .addOnSuccessListener {
+                _orders.update { current -> current.filter { it.id != orderId } }
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to delete order record")
+            }
+    }
+
+    fun fetchOrders() {
+        val user = auth.currentUser ?: return
+        db.collection("orders")
+            .whereEqualTo("userId", user.uid)
+            .get()
+            .addOnSuccessListener { result ->
+                val ordersList = result.toObjects(Order::class.java)
+                _orders.value = ordersList.sortedByDescending { it.date }
+            }
+    }
+
+    fun setCategory(category: String) { _selectedCategory.value = category }
+    fun setSearchQuery(query: String) { _searchQuery.value = query }
+
+    fun toggleFavorite(productId: Int) {
+        _favoriteIds.update { current ->
+            if (current.contains(productId)) current - productId else current + productId
+        }
+    }
+
+    fun setLocation(location: String) {
+        _currentLocation.value = location
     }
 }

@@ -1,5 +1,6 @@
 package com.example.onlinecoffeeapp.screens.cartitem.Veiw
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -18,92 +18,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onlinecoffeeapp.viewmodel.CartItem
 import com.example.onlinecoffeeapp.viewmodel.CoffeeViewModel
+import com.example.onlinecoffeeapp.viewmodel.Order
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     coffeeViewModel: CoffeeViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onCheckoutClick: () -> Unit
 ) {
     val cartItems by coffeeViewModel.cartItems.collectAsState()
-    var showOrderDialog by remember { mutableStateOf(false) }
+    val orders by coffeeViewModel.orders.collectAsState()
+    val context = LocalContext.current
     
     val brownColor = Color(0xFF8A5A36)
     val lightBgColor = Color(0xFFFFF5EE)
 
-
-    // Order Success Dialog
-    if (showOrderDialog) {
-        AlertDialog(
-            onDismissRequest = { showOrderDialog = false },
-            confirmButton = {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Button(
-                        onClick = { 
-                            showOrderDialog = false
-                            onBackClick() // Order place hone ke baad back chale jao
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = brownColor),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Done", fontWeight = FontWeight.Bold)
-                    }
-                }
-            },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = Color(0xFF4CAF50),
-                    modifier = Modifier.size(64.dp)
-                )
-            },
-            title = {
-                Text(
-                    text = "Order Placed Successfully!",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Your coffee has been ordered successfully.",
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Please wait, it will be ready in a few minutes!",
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = Color.White
-        )
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Cart", color = Color.White) },
+                title = { Text("My Cart & Orders", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
@@ -114,38 +55,40 @@ fun CartScreen(
         },
         containerColor = lightBgColor
     ) { innerPadding ->
-        if (cartItems.isEmpty() && !showOrderDialog) {
-            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                Text("Your cart is empty", fontSize = 18.sp, color = brownColor)
-            }
-        } else {
-            Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(cartItems) { item ->
-                        CartItemRow(
-                            item = item,
-                            onIncrease = { coffeeViewModel.updateQuantity(item, true) },
-                            onDecrease = { coffeeViewModel.updateQuantity(item, false) },
-                            onRemove = { coffeeViewModel.removeFromCart(item) },
-                            brownColor = brownColor
-                        )
-                    }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Current Cart Section
+            if (cartItems.isNotEmpty()) {
+                item {
+                    Text(
+                        "Items in Cart",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = brownColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
-
-                if (cartItems.isNotEmpty()) {
+                items(cartItems) { item ->
+                    CartItemRow(
+                        item = item,
+                        onIncrease = { coffeeViewModel.updateQuantity(item, true) },
+                        onDecrease = { coffeeViewModel.updateQuantity(item, false) },
+                        onRemove = { coffeeViewModel.removeFromCart(item) },
+                        brownColor = brownColor
+                    )
+                }
+                item {
                     val totalPrice = cartItems.sumOf { it.product.price * it.quantity }
-
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                        elevation = CardDefaults.cardElevation(4.dp)
                     ) {
-                        Column(modifier = Modifier.padding(24.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
@@ -155,19 +98,52 @@ fun CartScreen(
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
-                                onClick = { 
-                                    if (coffeeViewModel.checkout()) {
-                                        showOrderDialog = true
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                onClick = onCheckoutClick,
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = brownColor),
-                                shape = RoundedCornerShape(16.dp)
+                                shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("Check Out", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                Text("Review Order", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         }
                     }
+                }
+            } else if (orders.isEmpty()) {
+                item {
+                    Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Your cart is empty", fontSize = 18.sp, color = brownColor)
+                    }
+                }
+            }
+
+            // Recent Orders Section
+            if (orders.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Order History",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = brownColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+                items(orders) { order ->
+                    OrderHistoryCard(
+                        order = order,
+                        brownColor = brownColor,
+                        onDelete = {
+                            coffeeViewModel.cancelOrder(
+                                orderId = order.id,
+                                onSuccess = {
+                                    Toast.makeText(context, "Order record deleted", Toast.LENGTH_SHORT).show()
+                                },
+                                onFailure = { error ->
+                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    )
                 }
             }
         }
@@ -217,6 +193,48 @@ fun CartItemRow(
                     Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.Red)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun OrderHistoryCard(order: Order, brownColor: Color, onDelete: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+        elevation = CardDefaults.cardElevation(1.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text("Order ID: ${order.id.takeLast(6)}", fontWeight = FontWeight.Bold, color = brownColor)
+                    Text(order.date, fontSize = 12.sp, color = Color.Gray)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete Order", tint = Color.Red.copy(alpha = 0.7f))
+                }
+            }
+            
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp, color = Color.LightGray)
+            
+            order.items.forEach { item ->
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("${item.name} (x${item.quantity})", fontSize = 14.sp, color = brownColor)
+                    Text("Rs. ${item.price * item.quantity}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Total Paid", fontWeight = FontWeight.Bold, color = brownColor)
+                Text("Rs. ${order.amount}", fontWeight = FontWeight.Bold, color = brownColor)
+            }
+            Text("Status: ${order.status}", fontSize = 12.sp, color = Color(0xFF4CAF50), fontWeight = FontWeight.SemiBold)
         }
     }
 }

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "842459478104-8dhbbdvbhlgvebru25dl8hhdda6di9e8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.onlinecoffeeapp",
+            "certificate_hash": "56ce91f849a8e9ce5c227ced56e12432c30a6563"
+          }
+        },
+        {
           "client_id": "842459478104-cdarbjta6c4u2lis1h8gdokro1i4am5l.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -1,4 +1,4 @@
-package com.example.onlinecoffeeapp.screens.homescreen.Veiw
+package com.example.onlinecoffeeapp.screens.homescreen.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,14 +13,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onlinecoffeeapp.R
 import com.example.onlinecoffeeapp.model.Product
+import com.example.onlinecoffeeapp.screens.homescreen.Veiw.HomeCatagories
+import com.example.onlinecoffeeapp.screens.homescreen.Veiw.MySearchBar
+import com.example.onlinecoffeeapp.screens.homescreen.Veiw.ProductsGrid
 import com.example.onlinecoffeeapp.screens.ui_components.MyBottomNavBar
 import com.example.onlinecoffeeapp.viewmodel.CoffeeViewModel
 
@@ -39,7 +44,7 @@ fun HomeScreen(
     val currentLocation by coffeeViewModel.currentLocation.collectAsState()
     
     var showLocationMenu by remember { mutableStateOf(false) }
-    var isListView by remember { mutableStateOf(false) } // State for toggling List/Grid view
+    var isListView by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = { 
@@ -57,19 +62,30 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Background Brown Section
+            // Background Brown Section with Lahore Watermark
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp)
                     .background(color = Color(0xFF8A5A36))
-            )
+            ) {
+                // Lahore Landmark Watermark
+                Image(
+                    painter = painterResource(id = R.drawable.img), 
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 20.dp, end = 10.dp)
+                        .size(180.dp)
+                        .graphicsLayer(alpha = 0.08f),
+                    contentScale = ContentScale.Fit
+                )
+            }
 
             ProductsGrid(
                 products = filteredProducts,
                 favoriteIds = favoriteIds,
-                onFavoriteClick = { productId -> coffeeViewModel.toggleFavorite(productId) },
-                isListView = isListView, // Passing the toggle state
+                onFavoriteClick = { productId: Int -> coffeeViewModel.toggleFavorite(productId) },
                 topContent = {
                     Column(
                         modifier = Modifier.padding(horizontal = 16.dp)
@@ -83,12 +99,14 @@ fun HomeScreen(
                         ) {
                             Column {
                                 Text(
-                                    text = "Location",
-                                    color = Color.White,
-                                    fontSize = 14.sp
+                                    text = "Brewing in Lahore ☕",
+                                    color = Color(0xFFFFD700),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontStyle = FontStyle.Italic
                                 )
-
-                                Spacer(modifier = Modifier.height(4.dp))
+                                
+                                Spacer(modifier = Modifier.height(2.dp))
 
                                 Box {
                                     Row(
@@ -113,9 +131,9 @@ fun HomeScreen(
                                         onDismissRequest = { showLocationMenu = false },
                                         modifier = Modifier.background(Color.White)
                                     ) {
-                                        coffeeViewModel.availableLocations.forEach { location ->
+                                        for (location in coffeeViewModel.availableLocations) {
                                             DropdownMenuItem(
-                                                text = { Text(location, color = Color(0xFF8A5A36)) },
+                                                text = { Text(text = location, color = Color(0xFF8A5A36)) },
                                                 onClick = {
                                                     coffeeViewModel.setLocation(location)
                                                     showLocationMenu = false
@@ -131,28 +149,33 @@ fun HomeScreen(
 
                         MySearchBar(
                             query = searchQuery,
-                            onQueryChange = { coffeeViewModel.setSearchQuery(it) },
+                            onQueryChange = { text: String -> coffeeViewModel.setSearchQuery(text) },
                             onFilterClick = {
-                                isListView = !isListView // Toggling List/Grid view on icon click
+                                isListView = !isListView
                             }
                         )
 
                         Spacer(modifier = Modifier.height(40.dp))
 
-                        Image(
-                            painter = painterResource(id = R.drawable.ban),
-                            contentDescription = "Home Banner",
+                        // Banner Section
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp)),
-                            contentScale = ContentScale.FillWidth
-                        )
+                                .clip(RoundedCornerShape(16.dp))
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ban),
+                                contentDescription = "Home Banner",
+                                modifier = Modifier.fillMaxWidth(),
+                                contentScale = ContentScale.FillWidth
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         HomeCatagories(
                             selectedCategory = selectedCategory,
-                            onCategorySelected = { category -> coffeeViewModel.setCategory(category) }
+                            onCategorySelected = { category: String -> coffeeViewModel.setCategory(category) }
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
