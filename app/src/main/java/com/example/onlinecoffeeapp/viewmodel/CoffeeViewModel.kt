@@ -67,6 +67,9 @@ class CoffeeViewModel : ViewModel() {
     private val _currentLocation = MutableStateFlow("Gulberg, Lahore")
     val currentLocation: StateFlow<String> = _currentLocation.asStateFlow()
 
+    private val _isDarkMode = MutableStateFlow(false)
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+
     val availableLocations = listOf(
         "Gulberg, Lahore",
         "DHA Phase 1-9, Lahore",
@@ -241,5 +244,9 @@ class CoffeeViewModel : ViewModel() {
 
     fun setLocation(location: String) {
         _currentLocation.value = location
+    }
+
+    fun setDarkMode(enabled: Boolean) {
+        _isDarkMode.value = enabled
     }
 }

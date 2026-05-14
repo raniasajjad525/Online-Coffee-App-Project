@@ -95,22 +95,17 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Jee Aayan Nu! (Welcome)",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = brownColor
-            )
+            // "Jee Aayan Nu!" text removed as requested
             
             Text(
                 text = "Lahore's Coffee Connoisseur",
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 fontStyle = FontStyle.Italic,
-                color = goldColor,
-                fontWeight = FontWeight.Medium
+                color = brownColor,
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // User ID / Email
             Card(

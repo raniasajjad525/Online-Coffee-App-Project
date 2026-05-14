@@ -1,4 +1,4 @@
-package com.example.onlinecoffeeapp.screens.profilescreen.view
+package com.example.onlinecoffeeapp.screens.profilescreen.View
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*

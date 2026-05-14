@@ -1,4 +1,4 @@
-package com.example.onlinecoffeeapp.navigation
+package com.example.onlinecoffeeapp.screens.navigationsetup
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,26 +14,25 @@ import com.example.onlinecoffeeapp.screens.cartitem.Veiw.OrderReviewScreen
 import com.example.onlinecoffeeapp.screens.favorites.View.FavoritesScreen
 import com.example.onlinecoffeeapp.screens.forgetscreen.Veiw.ForgetPasswordScreen
 import com.example.onlinecoffeeapp.screens.homescreen.Veiw.ProductDetailScreen
-import com.example.onlinecoffeeapp.screens.homescreen.view.HomeScreen
+import com.example.onlinecoffeeapp.screens.homescreen.Veiw.HomeScreen
 import com.example.onlinecoffeeapp.screens.loginscreen.View.LoginScreen
 import com.example.onlinecoffeeapp.screens.profilescreen.View.AddressBookScreen
 import com.example.onlinecoffeeapp.screens.profilescreen.View.ProfileScreen
 import com.example.onlinecoffeeapp.screens.profilescreen.View.SettingsScreen
-import com.example.onlinecoffeeapp.screens.profilescreen.view.MyOrdersScreen
+import com.example.onlinecoffeeapp.screens.profilescreen.View.MyOrdersScreen
 import com.example.onlinecoffeeapp.screens.signupscreen.Veiw.SignUpScreen
 import com.example.onlinecoffeeapp.screens.welcomescreen.Veiw.WelcomeScreen
 import com.example.onlinecoffeeapp.viewmodel.AuthViewModel
 import com.example.onlinecoffeeapp.viewmodel.CoffeeViewModel
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    authViewModel: AuthViewModel = viewModel(),
+    coffeeViewModel: CoffeeViewModel = viewModel()
+) {
     val navController = rememberNavController()
-    val authViewModel: AuthViewModel = viewModel()
-    val coffeeViewModel: CoffeeViewModel = viewModel()
 
     // Flow: Welcome -> Login -> Home
-    // If user is already logged in, go straight to Home.
-    // Otherwise, show Welcome screen.
     val startDestination = if (authViewModel.currentUser != null) "home" else "welcome"
 
     NavHost(navController = navController, startDestination = startDestination) {
@@ -160,7 +159,10 @@ fun AppNavigation() {
         }
 
         composable("settings") {
-            SettingsScreen(onBackClick = { navController.popBackStack() })
+            SettingsScreen(
+                coffeeViewModel = coffeeViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(

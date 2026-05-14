@@ -10,14 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onlinecoffeeapp.viewmodel.CoffeeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBackClick: () -> Unit) {
+fun SettingsScreen(
+    coffeeViewModel: CoffeeViewModel,
+    onBackClick: () -> Unit
+) {
     val brownColor = Color(0xFF8A5A36)
     val lightBgColor = Color(0xFFFFF5EE)
     var notificationsEnabled by remember { mutableStateOf(true) }
-    var darkModeEnabled by remember { mutableStateOf(false) }
+    val darkModeEnabled by coffeeViewModel.isDarkMode.collectAsState()
 
     Scaffold(
         topBar = {
@@ -61,12 +65,12 @@ fun SettingsScreen(onBackClick: () -> Unit) {
                 Text("Dark Mode", fontSize = 16.sp, color = brownColor)
                 Switch(
                     checked = darkModeEnabled,
-                    onCheckedChange = { darkModeEnabled = it },
+                    onCheckedChange = { coffeeViewModel.setDarkMode(it) },
                     colors = SwitchDefaults.colors(checkedThumbColor = brownColor)
                 )
             }
             
-            Divider(color = brownColor.copy(alpha = 0.2f))
+            HorizontalDivider(color = brownColor.copy(alpha = 0.2f))
             
             Text("App Version: 1.0.0", fontSize = 14.sp, color = Color.Gray)
         }

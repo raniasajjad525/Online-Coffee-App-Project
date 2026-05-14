@@ -1,4 +1,4 @@
-package com.example.onlinecoffeeapp.screens.homescreen.view
+package com.example.onlinecoffeeapp.screens.homescreen.Veiw
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -62,30 +61,19 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Background Brown Section with Lahore Watermark
+            // Background Brown Section
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp)
                     .background(color = Color(0xFF8A5A36))
-            ) {
-                // Lahore Landmark Watermark
-                Image(
-                    painter = painterResource(id = R.drawable.img), 
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 20.dp, end = 10.dp)
-                        .size(180.dp)
-                        .graphicsLayer(alpha = 0.08f),
-                    contentScale = ContentScale.Fit
-                )
-            }
+            )
 
             ProductsGrid(
                 products = filteredProducts,
                 favoriteIds = favoriteIds,
                 onFavoriteClick = { productId: Int -> coffeeViewModel.toggleFavorite(productId) },
+                isListView = isListView,
                 topContent = {
                     Column(
                         modifier = Modifier.padding(horizontal = 16.dp)
