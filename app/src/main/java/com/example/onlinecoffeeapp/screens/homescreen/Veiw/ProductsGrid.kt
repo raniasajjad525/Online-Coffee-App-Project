@@ -8,10 +8,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.onlinecoffeeapp.model.Product
 
 @Composable
@@ -33,7 +34,7 @@ fun ProductsGrid(
     onFavoriteClick: (Int) -> Unit,
     topContent: @Composable () -> Unit,
     onProductClick: (Product) -> Unit,
-    isListView: Boolean = false
+    onAddToCartClick: (Product) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -44,106 +45,33 @@ fun ProductsGrid(
             topContent()
         }
         
-        if (isListView) {
-            items(products) { product ->
-                ProductListItem(
-                    product = product,
-                    isFavorite = favoriteIds.contains(product.id),
-                    onFavoriteClick = { onFavoriteClick(product.id) },
-                    onProductClick = onProductClick
+        items(items = products.chunked(size = 2)) { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ProductCard(
+                    product = rowItems[0],
+                    isFavorite = favoriteIds.contains(rowItems[0].id),
+                    onFavoriteClick = { onFavoriteClick(rowItems[0].id) },
+                    modifier = Modifier.weight(1f),
+                    onProductClick = onProductClick,
+                    onAddToCartClick = { onAddToCartClick(rowItems[0]) }
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        } else {
-            items(items = products.chunked(size = 2)) { rowItems ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                if (rowItems.size > 1) {
                     ProductCard(
-                        product = rowItems[0],
-                        isFavorite = favoriteIds.contains(rowItems[0].id),
-                        onFavoriteClick = { onFavoriteClick(rowItems[0].id) },
+                        product = rowItems[1],
+                        isFavorite = favoriteIds.contains(rowItems[1].id),
+                        onFavoriteClick = { onFavoriteClick(rowItems[1].id) },
                         modifier = Modifier.weight(1f),
-                        onProductClick = onProductClick
+                        onProductClick = onProductClick,
+                        onAddToCartClick = { onAddToCartClick(rowItems[1]) }
                     )
-                    if (rowItems.size > 1) {
-                        ProductCard(
-                            product = rowItems[1],
-                            isFavorite = favoriteIds.contains(rowItems[1].id),
-                            onFavoriteClick = { onFavoriteClick(rowItems[1].id) },
-                            modifier = Modifier.weight(1f),
-                            onProductClick = onProductClick
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-                Spacer(modifier = Modifier.height(12.dp))
             }
-        }
-    }
-}
-
-@Composable
-fun ProductListItem(
-    product: Product,
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit,
-    onProductClick: (Product) -> Unit
-) {
-    val brownColor = Color(0xFF8A5A36)
-    val cardColor = Color(0xFFF8F8F8)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(1.dp, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = cardColor)
-            .clickable { onProductClick(product) }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painter = painterResource(id = product.imagesRes),
-            contentDescription = product.name,
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = product.name,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Text(
-                text = product.description,
-                fontSize = 12.sp,
-                color = Color.Gray,
-                maxLines = 1
-            )
-            Text(
-                text = "Rs.${product.price}",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = brownColor
-            )
-        }
-
-        IconButton(onClick = onFavoriteClick) {
-            Icon(
-                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = "Favourite",
-                tint = if (isFavorite) brownColor else Color.Gray.copy(alpha = 0.5f),
-                modifier = Modifier.size(24.dp)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -154,7 +82,8 @@ fun ProductCard(
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    onAddToCartClick: () -> Unit
 ) {
     val brownColor = Color(0xFF8A5A36)
     val cardColor = Color(0xFFF8F8F8)
@@ -169,15 +98,29 @@ fun ProductCard(
         Column(
             modifier = Modifier.padding(10.dp)
         ) {
-            Image(
-                painter = painterResource(id = product.imagesRes),
-                contentDescription = product.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
+            // Check for Firebase URL first, otherwise use local resource
+            if (product.imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = product.imageUrl,
+                    contentDescription = product.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = product.imagesRes)
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = product.imagesRes),
+                    contentDescription = product.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -197,12 +140,33 @@ fun ProductCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = "Rs.${product.price}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = brownColor
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Rs.${product.price}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = brownColor
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(brownColor, RoundedCornerShape(8.dp))
+                        .clickable { onAddToCartClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add to cart",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
 
         Icon(

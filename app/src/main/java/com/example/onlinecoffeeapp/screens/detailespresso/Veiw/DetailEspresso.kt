@@ -38,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.onlinecoffeeapp.model.Product
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,14 +81,26 @@ fun ProductDetailScreen(
                     )
                 }
 
-                Image(
-                    painter = painterResource(id = product.imagesRes),
-                    contentDescription = product.name,
-                    modifier = Modifier
-                        .size(200.dp)
-                        .align(Alignment.Center),
-                    contentScale = ContentScale.Fit
-                )
+                if (product.imageUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = product.imageUrl,
+                        contentDescription = product.name,
+                        modifier = Modifier
+                            .size(200.dp)
+                            .align(Alignment.Center),
+                        contentScale = ContentScale.Fit,
+                        placeholder = painterResource(id = product.imagesRes)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = product.imagesRes),
+                        contentDescription = product.name,
+                        modifier = Modifier
+                            .size(200.dp)
+                            .align(Alignment.Center),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
 
             // Details Section

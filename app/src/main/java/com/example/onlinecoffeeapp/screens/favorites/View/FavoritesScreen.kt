@@ -23,7 +23,8 @@ import com.example.onlinecoffeeapp.viewmodel.CoffeeViewModel
 fun FavoritesScreen(
     coffeeViewModel: CoffeeViewModel,
     onBackClick: () -> Unit,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    onCartClick: () -> Unit = {}
 ) {
     val products by coffeeViewModel.products.collectAsState()
     val favoriteIds by coffeeViewModel.favoriteIds.collectAsState()
@@ -74,7 +75,10 @@ fun FavoritesScreen(
                             isFavorite = true,
                             onFavoriteClick = { coffeeViewModel.toggleFavorite(rowItems[0].id) },
                             modifier = Modifier.weight(1f),
-                            onProductClick = onProductClick
+                            onProductClick = onProductClick,
+                            onAddToCartClick = {
+                                onProductClick(rowItems[0])
+                            }
                         )
                         if (rowItems.size > 1) {
                             ProductCard(
@@ -82,7 +86,10 @@ fun FavoritesScreen(
                                 isFavorite = true,
                                 onFavoriteClick = { coffeeViewModel.toggleFavorite(rowItems[1].id) },
                                 modifier = Modifier.weight(1f),
-                                onProductClick = onProductClick
+                                onProductClick = onProductClick,
+                                onAddToCartClick = {
+                                    onProductClick(rowItems[1])
+                                }
                             )
                         } else {
                             Spacer(modifier = Modifier.weight(1f))

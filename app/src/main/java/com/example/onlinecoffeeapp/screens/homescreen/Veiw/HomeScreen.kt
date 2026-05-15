@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -22,11 +24,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onlinecoffeeapp.R
 import com.example.onlinecoffeeapp.model.Product
-import com.example.onlinecoffeeapp.screens.homescreen.Veiw.HomeCatagories
-import com.example.onlinecoffeeapp.screens.homescreen.Veiw.MySearchBar
-import com.example.onlinecoffeeapp.screens.homescreen.Veiw.ProductsGrid
 import com.example.onlinecoffeeapp.screens.ui_components.MyBottomNavBar
 import com.example.onlinecoffeeapp.viewmodel.CoffeeViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -36,6 +36,7 @@ fun HomeScreen(
     onProfileClick: () -> Unit = {},
     coffeeViewModel: CoffeeViewModel = viewModel()
 ) {
+    val allProducts by coffeeViewModel.products.collectAsState()
     val filteredProducts by coffeeViewModel.filteredProducts.collectAsState()
     val selectedCategory by coffeeViewModel.selectedCategory.collectAsState()
     val searchQuery by coffeeViewModel.searchQuery.collectAsState()
@@ -43,134 +44,170 @@ fun HomeScreen(
     val currentLocation by coffeeViewModel.currentLocation.collectAsState()
     
     var showLocationMenu by remember { mutableStateOf(false) }
-    var isListView by remember { mutableStateOf(false) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    Scaffold(
-        bottomBar = { 
-            MyBottomNavBar(
-                selectedItem = "Home",
-                onHomeClick = { /* Already on Home */ },
-                onCartClick = onCartClick,
-                onFavoritesClick = onFavoritesClick,
-                onProfileClick = onProfileClick
-            ) 
+    val categories = remember(allProducts) {
+        listOf("All") + allProducts.map { it.category }.distinct()
+    }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerContainerColor = Color.White,
+                modifier = Modifier.width(300.dp)
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Coffee Menu",
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF8A5A36)
+                )
+                
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        Text(
+                            text = "Categories",
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    items(categories) { category ->
+                        Text(
+                            text = category,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    scope.launch { drawerState.close() }
+                                    coffeeViewModel.setSearchQuery("")
+                                    coffeeViewModel.setCategory(category)
+                                }
+                                .padding(horizontal = 24.dp, vertical = 12.dp),
+                            fontSize = 17.sp,
+                            color = if (selectedCategory == category) Color(0xFF8A5A36) else Color.Black,
+                            fontWeight = if (selectedCategory == category) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+
+                    item {
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        Text(
+                            text = "Specific Coffees",
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    
+                    items(allProducts) { product ->
+                        Text(
+                            text = product.name,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    scope.launch { drawerState.close() }
+                                    coffeeViewModel.setCategory("All")
+                                    coffeeViewModel.setSearchQuery(product.name)
+                                }
+                                .padding(horizontal = 24.dp, vertical = 12.dp),
+                            fontSize = 17.sp,
+                            color = Color.Black
+                        )
+                    }
+                }
+            }
         }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            // Background Brown Section
+    ) {
+        Scaffold(
+            bottomBar = { 
+                MyBottomNavBar(
+                    selectedItem = "Home",
+                    onHomeClick = { 
+                        scope.launch { drawerState.close() }
+                        coffeeViewModel.setCategory("All")
+                        coffeeViewModel.setSearchQuery("")
+                    },
+                    onCartClick = onCartClick,
+                    onFavoritesClick = onFavoritesClick,
+                    onProfileClick = onProfileClick
+                ) 
+            }
+        ) { innerPadding ->
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp)
-                    .background(color = Color(0xFF8A5A36))
-            )
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(280.dp)
+                        .background(color = Color(0xFF8A5A36))
+                )
 
-            ProductsGrid(
-                products = filteredProducts,
-                favoriteIds = favoriteIds,
-                onFavoriteClick = { productId: Int -> coffeeViewModel.toggleFavorite(productId) },
-                isListView = isListView,
-                topContent = {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    ) {
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Brewing in Lahore ☕",
-                                    color = Color(0xFFFFD700),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    fontStyle = FontStyle.Italic
-                                )
-                                
-                                Spacer(modifier = Modifier.height(2.dp))
-
-                                Box {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.clickable { showLocationMenu = true }
-                                    ) {
-                                        Text(
-                                            text = currentLocation,
-                                            color = Color.White,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 16.sp
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Default.KeyboardArrowDown,
-                                            contentDescription = "Change Location",
-                                            tint = Color.White
-                                        )
-                                    }
-
-                                    DropdownMenu(
-                                        expanded = showLocationMenu,
-                                        onDismissRequest = { showLocationMenu = false },
-                                        modifier = Modifier.background(Color.White)
-                                    ) {
-                                        for (location in coffeeViewModel.availableLocations) {
-                                            DropdownMenuItem(
-                                                text = { Text(text = location, color = Color(0xFF8A5A36)) },
-                                                onClick = {
-                                                    coffeeViewModel.setLocation(location)
-                                                    showLocationMenu = false
-                                                }
-                                            )
+                ProductsGrid(
+                    products = filteredProducts,
+                    favoriteIds = favoriteIds,
+                    onFavoriteClick = { productId: Int -> coffeeViewModel.toggleFavorite(productId) },
+                    onProductClick = onProductClick,
+                    onAddToCartClick = { product ->
+                        onProductClick(product) // Open detail screen for selection and adding to cart
+                    },
+                    topContent = {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Brewing in Lahore ☕",
+                                        color = Color(0xFFFFD700),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontStyle = FontStyle.Italic
+                                    )
+                                    Box {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.clickable { showLocationMenu = true }
+                                        ) {
+                                            Text(text = currentLocation, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                                            Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null, tint = Color.White)
+                                        }
+                                        DropdownMenu(expanded = showLocationMenu, onDismissRequest = { showLocationMenu = false }) {
+                                            coffeeViewModel.availableLocations.forEach { loc ->
+                                                DropdownMenuItem(text = { Text(loc) }, onClick = { coffeeViewModel.setLocation(loc); showLocationMenu = false })
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-
-                        Spacer(modifier = Modifier.height(30.dp))
-
-                        MySearchBar(
-                            query = searchQuery,
-                            onQueryChange = { text: String -> coffeeViewModel.setSearchQuery(text) },
-                            onFilterClick = {
-                                isListView = !isListView
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.height(40.dp))
-
-                        // Banner Section
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ban),
-                                contentDescription = "Home Banner",
-                                modifier = Modifier.fillMaxWidth(),
-                                contentScale = ContentScale.FillWidth
+                            Spacer(modifier = Modifier.height(30.dp))
+                            MySearchBar(
+                                query = searchQuery,
+                                onQueryChange = { coffeeViewModel.setSearchQuery(it) },
+                                onFilterClick = { scope.launch { drawerState.open() } }
                             )
+                            Spacer(modifier = Modifier.height(40.dp))
+                            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))) {
+                                Image(painter = painterResource(id = R.drawable.ban), contentDescription = null, modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.FillWidth)
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HomeCatagories(selectedCategory = selectedCategory, onCategorySelected = { coffeeViewModel.setCategory(it) })
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        HomeCatagories(
-                            selectedCategory = selectedCategory,
-                            onCategorySelected = { category: String -> coffeeViewModel.setCategory(category) }
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
-                },
-                onProductClick = onProductClick
-            )
+                )
+            }
         }
     }
 }

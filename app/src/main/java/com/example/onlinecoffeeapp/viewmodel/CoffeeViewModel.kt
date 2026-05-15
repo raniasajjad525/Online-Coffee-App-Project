@@ -10,6 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -71,38 +72,14 @@ class CoffeeViewModel : ViewModel() {
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
     val availableLocations = listOf(
-        "Gulberg, Lahore",
-        "DHA Phase 1-9, Lahore",
-        "Johar Town, Lahore",
-        "Model Town, Lahore",
-        "Bahria Town, Lahore",
-        "Iqbal Town, Lahore",
-        "Garden Town, Lahore",
-        "Wapda Town, Lahore",
-        "Cavalry Ground, Lahore",
-        "Sammanabad, Lahore",
-        "Shadman, Lahore",
-        "Lahore Cantt",
-        "Township, Lahore",
-        "Faisal Town, Lahore",
-        "Sabzazar, Lahore",
-        "Lake City, Lahore",
-        "Valencia, Lahore",
-        "Green Town, Lahore",
-        "Architects Society, Lahore",
-        "EME Society, Lahore",
-        "State Life Society, Lahore",
-        "Paragon City, Lahore",
-        "Bahria Orchard, Lahore",
-        "Park View City, Lahore",
-        "Al-Rehman Garden, Lahore",
-        "Muslim Town, Lahore",
-        "Gulshan-e-Ravi, Lahore",
-        "Ichhra, Lahore",
-        "Garhi Shahu, Lahore",
-        "Mughalpura, Lahore",
-        "Mall Road, Lahore",
-        "Anarkali, Lahore"
+        "Gulberg, Lahore", "DHA Phase 1-9, Lahore", "Johar Town, Lahore", "Model Town, Lahore",
+        "Bahria Town, Lahore", "Iqbal Town, Lahore", "Garden Town, Lahore", "Wapda Town, Lahore",
+        "Cavalry Ground, Lahore", "Sammanabad, Lahore", "Shadman, Lahore", "Lahore Cantt",
+        "Township, Lahore", "Faisal Town, Lahore", "Sabzazar, Lahore", "Lake City, Lahore",
+        "Valencia, Lahore", "Green Town, Lahore", "Architects Society, Lahore", "EME Society, Lahore",
+        "State Life Society, Lahore", "Paragon City, Lahore", "Bahria Orchard, Lahore", "Park View City, Lahore",
+        "Al-Rehman Garden, Lahore", "Muslim Town, Lahore", "Gulshan-e-Ravi, Lahore", "Ichhra, Lahore",
+        "Garhi Shahu, Lahore", "Mughalpura, Lahore", "Mall Road, Lahore", "Anarkali, Lahore"
     )
 
     val filteredProducts: StateFlow<List<Product>> = combine(_products, _selectedCategory, _searchQuery) { products, category, query ->
@@ -118,19 +95,53 @@ class CoffeeViewModel : ViewModel() {
             .build()
         db.firestoreSettings = settings
         
-        loadProducts()
+        loadProductsFromFirestore()
         fetchOrders()
     }
 
-    private fun loadProducts() {
+    private fun loadProductsFromFirestore() {
+        db.collection("products")
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    loadLocalProducts()
+                    return@addSnapshotListener
+                }
+
+                if (value != null && !value.isEmpty) {
+                    val productList = value.toObjects(Product::class.java)
+                    _products.value = productList
+                } else {
+                    syncLocalProductsToFirestore()
+                }
+            }
+    }
+
+    private fun loadLocalProducts() {
         _products.value = listOf(
-            Product(1, "Espresso", "Strong and rich", 500.0, R.drawable.espresso, "Espresso"),
-            Product(2, "Latte", "Smooth and creamy", 300.0, R.drawable.latte, "Latte"),
-            Product(3, "Mocha", "Strong and smooth", 400.0, R.drawable.mocha, "Mocha"),
-            Product(4, "Lungo", "With chocolate", 550.0, R.drawable.lungo, "Lungo"),
-            Product(5, "Iris", "Velvety smooth", 450.0, R.drawable.iris, "Iris"),
-            Product(6, "Cappuccino", "Strong and thick", 600.0, R.drawable.cappuccino, "Cappuccino")
+            Product(1, "Espresso", "Strong and rich", 500.0, R.drawable.espresso, "", "Espresso"),
+            Product(2, "Latte", "Smooth and creamy", 300.0, R.drawable.latte, "", "Latte"),
+            Product(3, "Mocha", "Strong and smooth", 400.0, R.drawable.mocha, "", "Mocha"),
+            Product(4, "Lungo", "With chocolate", 550.0, R.drawable.lungo, "", "Lungo"),
+            Product(5, "Iris", "Velvety smooth", 450.0, R.drawable.iris, "", "Iris"),
+            Product(6, "Cappuccino", "Strong and thick", 600.0, R.drawable.cappuccino, "", "Cappuccino")
         )
+    }
+
+    fun syncLocalProductsToFirestore() {
+        val localProducts = listOf(
+            Product(1, "Espresso", "Strong and rich", 500.0, R.drawable.espresso, "", "Espresso"),
+            Product(2, "Latte", "Smooth and creamy", 300.0, R.drawable.latte, "", "Latte"),
+            Product(3, "Mocha", "Strong and smooth", 400.0, R.drawable.mocha, "", "Mocha"),
+            Product(4, "Lungo", "With chocolate", 550.0, R.drawable.lungo, "", "Lungo"),
+            Product(5, "Iris", "Velvety smooth", 450.0, R.drawable.iris, "", "Iris"),
+            Product(6, "Cappuccino", "Strong and thick", 600.0, R.drawable.cappuccino, "", "Cappuccino")
+        )
+
+        viewModelScope.launch {
+            for (product in localProducts) {
+                db.collection("products").document(product.id.toString()).set(product)
+            }
+        }
     }
 
     fun addToCart(product: Product, size: String) {

@@ -31,57 +31,37 @@ fun AppNavigation(
     coffeeViewModel: CoffeeViewModel = viewModel()
 ) {
     val navController = rememberNavController()
-
-    // Flow: Welcome -> Login -> Home
     val startDestination = if (authViewModel.currentUser != null) "home" else "welcome"
 
     NavHost(navController = navController, startDestination = startDestination) {
         
         composable("welcome") {
-            WelcomeScreen(
-                onGetStartedClick = {
-                    navController.navigate("login") {
-                        popUpTo("welcome") { inclusive = true }
-                    }
-                }
-            )
+            WelcomeScreen(onGetStartedClick = {
+                navController.navigate("login") { popUpTo("welcome") { inclusive = true } }
+            })
         }
 
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
-                    }
+                    navController.navigate("home") { popUpTo("login") { inclusive = true } }
                 },
-                onSignUpClick = {
-                    navController.navigate("signup")
-                },
-                onForgetPasswordClick = {
-                    navController.navigate("forget")
-                }
+                onSignUpClick = { navController.navigate("signup") },
+                onForgetPasswordClick = { navController.navigate("forget") }
             )
         }
 
         composable("signup") {
             SignUpScreen(
                 onSignUpSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("signup") { inclusive = true }
-                    }
+                    navController.navigate("home") { popUpTo("signup") { inclusive = true } }
                 },
-                onLoginClick = {
-                    navController.navigate("login")
-                }
+                onLoginClick = { navController.navigate("login") }
             )
         }
 
         composable("forget") {
-            ForgetPasswordScreen(
-                onBackToSignIn = {
-                    navController.popBackStack()
-                }
-            )
+            ForgetPasswordScreen(onBackToSignIn = { navController.popBackStack() })
         }
 
         composable("home") {
@@ -89,15 +69,9 @@ fun AppNavigation(
                 onProductClick = { product ->
                     navController.navigate("detail/${product.id}")
                 },
-                onCartClick = {
-                    navController.navigate("cart")
-                },
-                onFavoritesClick = {
-                    navController.navigate("favorites")
-                },
-                onProfileClick = {
-                    navController.navigate("profile")
-                },
+                onCartClick = { navController.navigate("cart") },
+                onFavoritesClick = { navController.navigate("favorites") },
+                onProfileClick = { navController.navigate("profile") },
                 coffeeViewModel = coffeeViewModel
             )
         }
@@ -115,9 +89,7 @@ fun AppNavigation(
                 coffeeViewModel = coffeeViewModel,
                 onBackClick = { navController.popBackStack() },
                 onOrderSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
-                    }
+                    navController.navigate("home") { popUpTo("home") { inclusive = true } }
                 }
             )
         }
@@ -137,9 +109,7 @@ fun AppNavigation(
                 authViewModel = authViewModel,
                 onBackClick = { navController.popBackStack() },
                 onLogoutSuccess = {
-                    navController.navigate("welcome") {
-                        popUpTo("home") { inclusive = true }
-                    }
+                    navController.navigate("welcome") { popUpTo("home") { inclusive = true } }
                 },
                 onMyOrdersClick = { navController.navigate("my_orders") },
                 onAddressBookClick = { navController.navigate("address_book") },
@@ -148,10 +118,7 @@ fun AppNavigation(
         }
 
         composable("my_orders") {
-            MyOrdersScreen(
-                onBackClick = { navController.popBackStack() },
-                coffeeViewModel = coffeeViewModel
-            )
+            MyOrdersScreen(onBackClick = { navController.popBackStack() }, coffeeViewModel = coffeeViewModel)
         }
 
         composable("address_book") {
@@ -159,10 +126,7 @@ fun AppNavigation(
         }
 
         composable("settings") {
-            SettingsScreen(
-                coffeeViewModel = coffeeViewModel,
-                onBackClick = { navController.popBackStack() }
-            )
+            SettingsScreen(coffeeViewModel = coffeeViewModel, onBackClick = { navController.popBackStack() })
         }
 
         composable(
